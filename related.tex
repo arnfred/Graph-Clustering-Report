@@ -1,4 +1,21 @@
 \section{Related work}
+
+Over the last 40 years a large variety of algorithms have been invented 
+to cluster graphs. Most of these methods were based on different 
+measures of optimal clustering all of which were usually np-hard to 
+derive optimal solutions for. The field has seen a boost in recent years 
+due to the increased demands for handling large data that are usually 
+neatly abstracted as graphs\cite[p. 2]{fortunato2010}. Examples include 
+social networks and the world wide web.
+
+In this paper I don't intend to do a thorough review of the field, 
+something which many much better abled people have already done before 
+me\footnote{Examples include \cite{newman2004}, \cite{shcaeffer2007} and 
+\cite{fortunato2010}}. Instead I have tried to pick out a few distinct 
+algorithms that are good enough that each could have been a candidate 
+for a clustering algorithm used for grouping the scientific articles.
+
+
 % von2007 : schaeffer
 % fortunato2010 : community detection in graphs
 % lancichinetti2008 : comparison
@@ -8,6 +25,9 @@
 
 \subsection{How to measure clustering}
 
+\subsection{Minimum-cut clustering}
+% newman2005 and probably von2007
+
 \subsection{Girvan–Newman clustering}
 % https://en.wikipedia.org/wiki/Girvan%E2%80%93Newman_algorithm
 % girvan2002
@@ -16,13 +36,40 @@
 % ng2002 the algorithm I use
 % von2007 tutorial
 
-\subsection{Minimum-cut clustering}
-% newman2005 and probably von2007
-
 \subsection{Random Walk clustering
 % rosvall2008
 
 \subsection{Community maximization clustering}
+The ``Louvain Method'' as it is popularly called was introduced in 2008 
+by \cite{blondel2008} and made it possible to feasibly cluster more than 
+100 million nodes as compared to the few million nodes which had 
+formerly been possible with the fastest methods. The method is based on 
+the measure of modularity in a graph which measures the density of links 
+inside communities compared to the links between communities as a scalar 
+between $1$ and $-1$\cite{girvan2002}. For a weighted graph it is 
+defined as follows
+\begin{equation}
+	Q = \frac{1}{2m} \sum_{i,j} \leftbracket A_{ij} - \frac{k_i k_j}{2m} 
+	\rightbracket \delta(c_i, c_j)
+\end{equation}
+where $m=\frac{1}{2} \sum_{ij} A_{ij}$, $k_i = \sum_j A_{ij}$ and 
+$A_{ij}$ is the weight between the edge connecting $i$ and $j$. The 
+algorithm works by assigning each node to it's proper cluster and then 
+for each iteration reassign nodes to neighboring communities if it 
+increases the community measure. These iterations are carried out until 
+there are no reassignments in which case an initial clustering has been 
+reached. For graphs consisting of a large number of nodes, the algorithm 
+can now be repeated, treating each of the resulting clusters as a node 
+and repeating the same procedure.
+
+In terms of speed and simplicity the Louvain method is one of the best 
+methods available today. It has a computational complexity of TODO [add 
+complexity] and is very simple to implement. What's more, there is no 
+need to specify how many clusters we should receive and the individual 
+cluster sizes have shown to be sensible in real world trials. As for the 
+quality of the solution it compares favorably to other clustering 
+methods in a comparison in \cite{lancichinetti2008} only beaten by WHAT 
+AND WHAT?.
 % blondel2008
 
 \subsection{Expectation minimization clustering}

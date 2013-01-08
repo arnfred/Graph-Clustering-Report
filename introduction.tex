@@ -58,7 +58,7 @@ outline first how they have been implemented and then how they compare.
 Before we get that far, I will start with a quick primer on the notation 
 used in the rest of this paper.
 
-\subsection{Notation}
+\subsection{Terms and Notation}
 
 For the reminder of this paper I will rely on concepts and notation from 
 Graph theory. To facilitate the discussion of different graph clustering 
@@ -73,4 +73,12 @@ adjecency matrix $\textbf{A}_G$ is an $n \times n$ matrix $\textbf{A}_G
 = (a_{v,u}^G)$ where $a_{v,u}^G = \omega(\{v,y\})$ if $\{v,u\} \in E$ 
 and $0$ otherwise\footnote{Adapted from \cite{shaeffer2007}}.
 
-
+Additionally it is worth mentioning that the terms \emph{cluster} and 
+\emph{community} are both used in the academic litterature usually 
+covering over the same thing. Where algorithms on graphs are involved 
+the word \emph{clustering} has traditionally been used more where as 
+communities are often mentioned in terms of \emph{networks} that are 
+then later formalized as graphs. In this paper I have chosen to use the 
+words \emph{cluster} and \emph{clustering}, but this choice is not 
+intended to reflect a stronger connotation with one group of methods 
+than another.
