@@ -1,4 +1,5 @@
 \section{Introduction}
+
 When we try to make sense of a big amount of information, a natural way 
 of beginning is to divide the information into smaller groups, and 
 investigate these groups seperately. Often we assign these groups 
@@ -11,29 +12,65 @@ implicitely include were we grouping the information manually and the
 groups that are calculated might be across features and of sizes that 
 render them less useful.
 
-This project aims to explore how to best group a selection of conference 
-articles. It is part of a project to provide a tool for conference 
+\subsection{Background}
+
+This project aims to explore how a group of conference articles are best 
+grouped. It is part of a project to provide a tool for conference 
 attendees to better get an overview over the hundreds of presentations 
-that usually take place at a medium sized scientific conference. If we 
-are able to cluster
+that usually take place at a scientific conference. In order to 
+facilitate exploring the presentations, we display the articles in a 
+similarity graph where two similar articles are connected more tightly 
+than articles describing different topics. The similarity is currently 
+based on a na\acute{i}ve bayesian comparison of word frequencies, but 
+could in theory be substituted with any given similarity measure.
 
-As part of a project to provide a tool for conference attendees to 
-better get an overview of what presentations to attend, The question of 
-automatically grouping information in a meaningful way is at the center 
-of this project. Working with a project to  with a project called 
-Trailhead We have papers about information theory published at a couple 
-of conferences, and for each conference it would greatly aid if we could 
-automatically organize these papers in groups.
-
-\subsection{The central problem}
-
-There are many methods a selection of scientific articles could 
-potentially be grouped, but since a central part of 
-
-\subsection{To Define a Clustering}
-
-\subsection{Terms and Notation}
-
-For the reminder of this paper I will use
+Based on this similarity graph the goal is to create a grouping which 
+satisfies a few practical as well as theoretical criteria. These 
+criteria are selected with respect to real world usage where running 
+times and implementation complexity are important.  The criteria are:
+\begin{itemize}
+	\item[Speed]{Since this is a tool made for real world usage it must 
+			be feasible to calculate a grouping of up to a thousand 
+		articles within a few hours on normal hardware}
+	\item[Quality]{A given solution should be as `good' as possible.  
+			Later in this paper we will explore more in depth how we can 
+		possibly measure what a `good' clustering implies}
+	\item[Simplicity]{Given two similar solutions, the simpler one is 
+			better for two reasons. First, a simple solution is easier 
+			to implement and readapt to changing requirements. Second, a 
+		simple solution is less prone to contain bugs}
+	\item[Sensible Groupins]{A good solution should not return one group 
+			encompassing pretty much all papers and leave the rest of 
+			the groups with one or two papers. Similarly a good 
+			clustering doesn't necessarily split the graph into $n$ 
+		groups of exactly the same size}
+	\item[No Parameters]{Ideally an algorithm for finding groups should 
+		not need to be provided with anything else than the similarity 
+	graph}
+\end{itemize}
 
 \subsection{Structure of the paper}
+
+In this paper I will outline a selection of different methods used to 
+cluster similarity graphs and evaluate each one based on the above 
+criteria. Based on this selection I will propose two algorthims and 
+outline first how they have been implemented and then how they compare.  
+Before we get that far, I will start with a quick primer on the notation 
+used in the rest of this paper.
+
+\subsection{Notation}
+
+For the reminder of this paper I will rely on concepts and notation from 
+Graph theory. To facilitate the discussion of different graph clustering 
+algorithms I will introduce a few simple concepts here that will appear 
+several times later on. A \emph{weighted graph} $G$ is a tripple of 
+tripple of two sets and a function: $G = (V, E, \omega)$. $V$ and $E$ 
+are sets of \emph{vertices} and \emph{edges} respectively, with $n = 
+|V|$ being the \emph{order} of the graph. Each edge in an 
+\emph{undirected graph} is an unordered pair $\{v, w\}$ and has a weight 
+assigned by the function $\omega : E \reftarrow \mathbb{R}$. The 
+adjecency matrix $\textbf{A}_G$ is an $n \times n$ matrix $\textbf{A}_G 
+= (a_{v,u}^G)$ where $a_{v,u}^G = \omega(\{v,y\})$ if $\{v,u\} \in E$ 
+and $0$ otherwise\footnote{Adapted from \cite{shaeffer2007}}.
+
+
