@@ -10,7 +10,7 @@ social networks and the world wide web.
 
 In this paper I don't intend to do a thorough review of the field, 
 something which many much better abled people have already done before 
-me\footnote{Examples include \cite{newman2004}, \cite{shcaeffer2007} and 
+me\footnote{Examples include \cite{newman2004}, \cite{schaeffer2007} and 
 \cite{fortunato2010}}. Instead I have tried to pick out a few distinct 
 algorithms that are good enough that each could have been a candidate 
 for a clustering algorithm used for grouping the scientific articles.
@@ -29,14 +29,103 @@ for a clustering algorithm used for grouping the scientific articles.
 % newman2005 and probably von2007
 
 \subsection{Girvan–Newman clustering}
+If we look at the problem of clustering a graph as a problem of removing 
+edges until we arrive at a set amount of communities, we need a good 
+measure for what edges should be removed. The Girvan-Newman algorithm 
+proposes that we remove edges based on a measure of ``betweenness'', 
+that is how much a particular edge $e_{ij}$ is situated between 
+clusters. The betweenness of $e_{ij}$ is calculated by counting how many 
+shortest paths between pairs of vertices that run through $e_{ij}$. In 
+case there is ($k > 1$) shortest paths, each path traversing $e_{ij}$ 
+contribues $\frac{1}{k}$ to the count.  If we define $\sigma_{st}$ as 
+the number of shortest paths between vertic $s$ and $t$, and 
+$\sigma_{st}(v)$ as the number of shortest paths between $s$ and $t$ 
+traversing $e_{ij}$ we can write betweenness as
+\begin{equation}
+	C_B(v)= \sum_{s \neq v \neq t \in V} \
+	\frac{\sigma_{st}(v)}{\sigma_{st}}
+\end{equation}
+Using this measure we can iteratively construct a dendrogram by 
+calculating all the shortest paths of the graph, then finding the edge 
+with the highest betweenness and finally remove this edge and repeat. A 
+common way to find the best amount of groupings is to stop removing 
+edges when the highest value measure of community\footnote{This measure 
+	is further explained when reviewing the Louvain method as well as in 
+the chapter on measures of graph quality} is obtained.
+The complexity of this algorthim is $O(n^3)$ in the general case, but it
+can be calculated slightly faster when the graph is sparse. The 
+algorithm does perform particularly well on random graphs, but it is 
+very simple to implement and requires no additional parameters.
+
+
 % https://en.wikipedia.org/wiki/Girvan%E2%80%93Newman_algorithm
 % girvan2002
 
 \subsection{Spectral clustering}
+From spectral graph theory we get the spectral clustering algorithm 
+which in reality is an ensemble of different algorithms all solving the 
+problem of clustering a similarity graph in similar ways. The general 
+idea is to use the eigenspectrum of the graph Laplacian to derive a set 
+of $k$ othonormal vectors that are trivial to cluster using a k-means 
+algorithm to arrive at $k$ clusters\cite{von2007}. The parameter $k$ 
+needs to be decided in advance. The differences across spectral 
+clustering algorithms usually lie in how the graph Laplacian is defined.  
+One approach is to define the Laplacian $L_G$ for a graph $G$ as $L_G = 
+D_G - A_G$. However it has been shown that using the normalized 
+Laplacian yields better results.  One way to define the normalized 
+Laplacian as used in \cite{ng2002} is $L_G = I - D_{G}^{-1/2} A_G 
+D_{G}^{-1/2}$.
+
+Spectral clustering suffers from the fact that we need to decide the 
+amount of clusters to output before running the algorithm. This can be 
+avoided by calculating clusterings for $2$ to $k$ groupings and then 
+find the number that optimizes a given measure of quality, for example 
+the measure of community. The complexity of calculating the eigenvectors 
+is $O(n^3)$ in the worst case. This can be sped up using the Lanczos 
+method\footnote{See for example \cite{golub1996}}, but the worst case 
+complexity is still the same. As for the quality of a solution derived 
+with spectral clustering a lot of research has been made on the subject, 
+but there has not been any definite results. In \cite{lancichinetti2009} 
+a spectral method was compared to several other algorithms using a 
+randomly generated graph and not found particularly well performing.  A 
+big advantage of spectral clustering is that it is simple to implement.
 % ng2002 the algorithm I use
 % von2007 tutorial
 
-\subsection{Random Walk clustering
+\subsection{An approach from Information Theory}
+Instead of looking at a graph theoretic measures of clusterness, an 
+alternative idea proposed by \cite{rosvall2008} is to turn to 
+Information Theory. The approach they propose is to look at clustering 
+as a problem of how best to encode the the path of a random walk. A 
+random walk in a weighted graph is a traversal from node to node where a 
+step from a vertix $v_i$ to another vertix $v_j$ connected to $v_i$ by 
+the edge $e_{ij}$ happens with a probability $p_{ij}$. We can calculate 
+$p_{ij}$ as $\frac{w_{ij}}{d_i}$. This means that edges with a high 
+weight are traveled often and nodes with a high degree are visited 
+often. If we choose to characterize the random walk as a walk that most 
+of the time remains within clusters and occasionally goes between 
+clusters we can encode this walk by attributing each cluster a word, and 
+then for each cluster reuse the same codewords. This way we can derive 
+the average description length of a single step as follows:
+\begin{equation}
+	L(\textbf{M}) = q H(\mathcal{Q}) + \sum_{i=1}^{m} p^i \
+	H(\mathcal{P}^i)
+\end{equation}
+In this equation $H(\mathcal{Q})$ is the entropy of the cluster names 
+and $H(\mathcal{P}^i)$ is the entropy of the within-cluster movements 
+including an extra word to designate that we are leaving the cluster.  
+$q$ is the probability that we switch between clusters at any given 
+step, while $p$ is the fraction of within-cluster movements that occur 
+in cluster $i$ plus the probability of exiting cluster i. Optimizing 
+this measure leads us to an optimal clustering. In practice this is done 
+by exploring the space of possible clusters using a breadth first search 
+and refining these results using simulated annealing.
+
+This approach has several positive properties. It doesn't need 
+parameters and is relatively fast with a complexity of $O(m)$ and in 
+\cite{lancichinetti2009} it is rated as one of the best performing 
+algorithms. However the implementation is relatively involved using 
+several different concepts stitched together.
 % rosvall2008
 
 \subsection{Community maximization clustering}
@@ -49,8 +138,8 @@ inside communities compared to the links between communities as a scalar
 between $1$ and $-1$\cite{girvan2002}. For a weighted graph it is 
 defined as follows
 \begin{equation}
-	Q = \frac{1}{2m} \sum_{i,j} \leftbracket A_{ij} - \frac{k_i k_j}{2m} 
-	\rightbracket \delta(c_i, c_j)
+	Q = \frac{1}{2m} \sum_{i,j} \lbrack A_{ij} - \frac{k_i k_j}{2m} 
+	\rbrack \delta(c_i, c_j)
 \end{equation}
 where $m=\frac{1}{2} \sum_{ij} A_{ij}$, $k_i = \sum_j A_{ij}$ and 
 $A_{ij}$ is the weight between the edge connecting $i$ and $j$. The 
@@ -68,8 +157,9 @@ complexity] and is very simple to implement. What's more, there is no
 need to specify how many clusters we should receive and the individual 
 cluster sizes have shown to be sensible in real world trials. As for the 
 quality of the solution it compares favorably to other clustering 
-methods in a comparison in \cite{lancichinetti2008} only beaten by WHAT 
-AND WHAT?.
+methods in a comparison in \cite{lancichinetti2009} only matched by the 
+so-called InfoMap algorithm proposed in \cite{rosvall2008} (described 
+above) and the algorithm proposed in \cite{ronhovde2009}.
 % blondel2008
 
 \subsection{Expectation minimization clustering}

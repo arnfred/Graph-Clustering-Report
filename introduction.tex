@@ -21,8 +21,8 @@ that usually take place at a scientific conference. In order to
 facilitate exploring the presentations, we display the articles in a 
 similarity graph where two similar articles are connected more tightly 
 than articles describing different topics. The similarity is currently 
-based on a na\acute{i}ve bayesian comparison of word frequencies, but 
-could in theory be substituted with any given similarity measure.
+based on a na\"{i}ve bayesian comparison of word frequencies, but could 
+in theory be substituted with any given similarity measure.
 
 Based on this similarity graph the goal is to create a grouping which 
 satisfies a few practical as well as theoretical criteria. These 
@@ -39,11 +39,11 @@ times and implementation complexity are important.  The criteria are:
 			better for two reasons. First, a simple solution is easier 
 			to implement and readapt to changing requirements. Second, a 
 		simple solution is less prone to contain bugs}
-	\item[Sensible Groupins]{A good solution should not return one group 
-			encompassing pretty much all papers and leave the rest of 
-			the groups with one or two papers. Similarly a good 
-			clustering doesn't necessarily split the graph into $n$ 
-		groups of exactly the same size}
+%	\item[Sensible Groupins]{A good solution should not return one group 
+%	encompassing pretty much all papers and leave the rest of the groups 
+%	with one or two papers. Similarly a good clustering doesn't 
+%	necessarily split the graph into $n$ groups of exactly the same 
+%	size}
 	\item[No Parameters]{Ideally an algorithm for finding groups should 
 		not need to be provided with anything else than the similarity 
 	graph}
@@ -66,12 +66,16 @@ algorithms I will introduce a few simple concepts here that will appear
 several times later on. A \emph{weighted graph} $G$ is a tripple of 
 tripple of two sets and a function: $G = (V, E, \omega)$. $V$ and $E$ 
 are sets of \emph{vertices} and \emph{edges} respectively, with $n = 
-|V|$ being the \emph{order} of the graph. Each edge in an 
-\emph{undirected graph} is an unordered pair $\{v, w\}$ and has a weight 
-assigned by the function $\omega : E \reftarrow \mathbb{R}$. The 
-adjecency matrix $\textbf{A}_G$ is an $n \times n$ matrix $\textbf{A}_G 
-= (a_{v,u}^G)$ where $a_{v,u}^G = \omega(\{v,y\})$ if $\{v,u\} \in E$ 
-and $0$ otherwise\footnote{Adapted from \cite{shaeffer2007}}.
+|V|$ being the \emph{order} of the graph and $m = |E|$ being the number 
+of edges. Each edge $e_{ij}$ in an \emph{undirected graph} is an 
+unordered pair $\{v_i, v_j\}$ and has a weight $w_{ij}$ assigned by the 
+function $\omega : E \rightarrow \mathbb{R}$. The degree of a vertix 
+$v_i \in V$ is defined as $d_i = \sum_{j = 1}^n w_{ij}$. The adjecency 
+matrix $\textbf{A}_G$ is an $n \times n$ matrix $\textbf{A}_G = 
+(a_{i,j}^G)$ where $a_{i,j}^G = \omega(\{v_i,v_j\})$ if $\{v_i,v_j\} \in 
+E$ and $0$ otherwise.  The degree matrix $\textbf{D}_G$ in turn is the 
+diagonal matrix of size $n \times n$ such that $D_{ii} = d_i$
+\footnote{Adapted from \cite{schaeffer2007} and \cite{von2007}}.
 
 Additionally it is worth mentioning that the terms \emph{cluster} and 
 \emph{community} are both used in the academic litterature usually 
