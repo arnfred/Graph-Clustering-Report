@@ -1,19 +1,19 @@
 \section{Implementation}
 To get an understanding of the advantages and limitations of these 
-algorithms, I have undertaken to implement two of them on in order to 
+algorithms, I have undertaken to implement two of them in order to 
 cluster the conference articles. The choice of algorithms have been 
-based in the four criteria mentioned in the introduction (\emph{speed, 
+based on the four criteria mentioned in the introduction (\emph{speed, 
 quality, simplicity, no parameters}) with a special emphasis on 
 simplicity. Simplicity is important because moving from a simple 
 solution to a more advanced algorithm often is relatively straight 
-forward if the two algorithms are related. With this in mind it's better 
-to start out with a sub-optimal algorithm that works, than a better 
-algorithm containing parts that aren't well understood and tested.  
-Additionally a simple baseline solution makes it easy to test more 
-advanced algorithms to check if they get similar results and if they 
-might improve the \emph{Modularity} or \emph{Surprise}. Another factor 
-that was important in the decision of what algorithm to implement was 
-the actual real world usage of the algorithm. A strong preference is 
+forward if the two algorithms are related. With this in mind it is 
+better to start out with a sub-optimal algorithm that works, than a 
+better algorithm containing parts that aren't well understood and 
+tested.  Additionally a simple baseline solution makes it easy to test 
+more advanced algorithms to check if they get similar results and if 
+they might improve the \emph{Modularity} or \emph{Surprise}. Another 
+factor that was important in the decision of what algorithm to implement 
+was the actual real world usage of the algorithm. A strong preference is 
 given to algorithms that have proven themselves and are being used in 
 real world solutions all ready.
 
@@ -54,11 +54,11 @@ another community. This structure ensures that we can recursively assign
 communities to other communities to facilitate running the Louvain 
 algorithm on the found clusters, something that was proposed in 
 \cite{blondel2008} when dealing with large graphs. The similarity graph 
-obtained from the conference papers is pruned for so each node retains 
-only the four highest weighted links before calculating the clustering.  
-While this doesn't make a difference for the running time of the 
-spectral clustering, it drastically reduces the running time of the 
-Louvain method.
+obtained from the conference papers is pruned for edges so each vertex 
+retains only the four highest weighted links before calculating the 
+clustering.  While this doesn't make a difference for the running time 
+of the spectral clustering, it drastically reduces the running time of 
+the Louvain method.
 
 The same modifications to the web application mentioned above were 
 modified to accommodate Louvain clustering as well. The code can be 
@@ -74,7 +74,7 @@ in the branch \emph{Cluster}\footnote{Look at Louvain.scala}.
 \begin{tabular}{l*{4}{c}}
 	Algorithm & Approx. Running Time \footnote{Approx. Running Time is 
 	on a standard laptop with 8gb ram and 2.2Ghz dual core processor for 
-618 articles}& Modularity\footnote{For Spectral clustering the maximum 
+640 articles}& Modularity\footnote{For Spectral clustering the maximum 
 modularity is given for all partition sizes} \\
 	\hline
 	\noalign{\smallskip} 
@@ -101,26 +101,26 @@ modularity is given for all partition sizes} \\
 \end{table}
 
 In table \ref{table:stats} the typical running time and 
-\emph{modularity} of \emph{Spectral} clustering and the \emph{Louvain} 
-method can be seen as measured on the articles from the 2012 ISIT, a 
+\emph{Modularity} of \emph{Spectral} clustering and the \emph{Louvain} 
+method can be seen as measured on the 640 articles from the 2012 ISIT, a 
 conference dealing with with topics in information theory. In terms of 
-\emph{modularity} The table doesn't show the whole truth as can be seen 
+\emph{Modularity} The table doesn't show the whole truth as can be seen 
 in table \ref{table:partition_size}. As the partition size for spectral 
-clustering is increased, the \emph{modularity} goes down at first and 
+clustering is increased, the \emph{Modularity} goes down at first and 
 then stabilizes.  The author speculates that spectral clustering's 
 tendency to partition a graph evenly comes at a disadvantage when the 
 graph contains clusters of varying sizes. It is possible that the known 
-bias of the \emph{modularity} measure towards bigger clusters plays a 
+bias of the \emph{Modularity} measure towards bigger clusters plays a 
 role in this behaviour as well.
 
 When evaluating these results it is important to keep in mind that both 
-the \emph{modularity} and the results of \cite{lancichinetti2009} are 
+the \emph{Modularity} and the results of \cite{lancichinetti2009} are 
 based on implicit assumptions about the structure of the clusters in the 
 graph used. In order to best apply their results it makes sense to have 
 an idea of the statistical properties of the clusterings of the graph.  
 This in turn is difficult to obtain without using an algorithm to obtain 
 a clustering, something that implicitly introduces bias. This chicken 
-and the egg problematic is a bit hard to escape from as long as we don't 
+and the egg problematic is a hard to escape from as long as we don't 
 construct a model for how we expect the graph to behave and evaluate the 
 clustering algorithms based on these terms. This however is beyond the 
 scope of this paper.
