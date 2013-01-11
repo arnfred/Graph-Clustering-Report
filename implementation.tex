@@ -1,9 +1,139 @@
 \section{Implementation}
+To get an understanding of the advantages and limitations of these 
+algorithms, I have undertaken to implement two of them on in order to 
+cluster the conference articles. The choice of algorithms have been 
+based in the four criteria mentioned in the introduction (\emph{speed, 
+quality, simplicity, no parameters}) with a special emphasis on 
+simplicity. Simplicity is important because moving from a simple 
+solution to a more advanced algorithm often is relatively straight 
+forward if the two algorithms are related. With this in mind it's better 
+to start out with a sub-optimal algorithm that works, than a better 
+algorithm containing parts that aren't well understood and tested.  
+Additionally a simple baseline solution makes it easy to test more 
+advanced algorithms to check if they get similar results and if they 
+might improve the \emph{Modularity} or \emph{Surprise}. Another factor 
+that was important in the decision of what algorithm to implement was 
+the actual real world usage of the algorithm. A strong preference is 
+given to algorithms that have proven themselves and are being used in 
+real world solutions all ready.
 
-\subsection{The choice of two algorithms}
+With this in mind I have implemented spectral clustering and the Louvain 
+algorithm. They are both algorithms with wide usage outside of 
+academia, and while spectral clustering has been surpassed in terms of 
+speed and quality, it still stands as a nice baseline for measuring the 
+success of later algorithms.
 
 \subsection{Implementing spectral clustering}
 
+Spectral Clustering is implemented based on the algorithm for normalized 
+spectral clustering according to \cite{ng2002} as shown and explained in 
+\cite[p. 7]{von2007}. The algorithm is implemented using the 
+\emph{Breeze}\footnote{\url{http://www.scalanlp.org/}} linear algebra 
+library for \emph{Scala}\footnote{\url{http://www.scala-lang.org}}.
+The code can be found on 
+Github\footnote{\url{https://github.com/Traill/papers-web/tree/cluster/src/paper}} 
+in the branch \emph{Cluster}\footnote{Look at Cluster.scala and 
+spectral.scala}.  It is adapted to work with the scala based project for 
+parsing and measuring conference articles which can also be found on 
+github\footnote{\url{https://github.com/Traill/papers-web/tree/master/}}.  
+Based on the conference articles I obtain a dense similarity graph on 
+which the spectral clustering is calculated for $k-1$ different amount 
+of clusters, going from $2$ to $k$, $k < n$, usually $n/10$.
+
+Since part of the project is an interactive website with a browsable 
+graph, a simple tool was designed to dynamically load a partition of the 
+graph from a server.  Upon loading this partition the graph would be 
+partitioned accordingly and graphically animated to reorganize into the 
+given clusters.
+
 \subsection{Implementing Louvain clustering}
 
-\subsection{The results}
+The Louvain method is implemented by creating a tree-structure with 
+leafs containing articles and communities containing either a leaf or 
+another community. This structure ensures that we can recursively assign 
+communities to other communities to facilitate running the Louvain 
+algorithm on the found clusters, something that was proposed in 
+\cite{blondel2008} when dealing with large graphs. The similarity graph 
+obtained from the conference papers is pruned for so each node retains 
+only the four highest weighted links before calculating the clustering.  
+While this doesn't make a difference for the running time of the 
+spectral clustering, it drastically reduces the running time of the 
+Louvain method.
+
+The same modifications to the web application mentioned above were 
+modified to accommodate Louvain clustering as well. The code can be 
+found on 
+Github\footnote{\url{https://github.com/Traill/papers-web/tree/cluster/src/paper}} 
+in the branch \emph{Cluster}\footnote{Look at Louvain.scala}.
+
+\section{Results and discussion}
+
+\begin{savenotes}
+\begin{table}
+	\small
+\begin{tabular}{l*{4}{c}}
+	Algorithm & Approx. Running Time \footnote{Approx. Running Time is 
+	on a standard laptop with 8gb ram and 2.2Ghz dual core processor for 
+618 articles}& Modularity\footnote{For Spectral clustering the maximum 
+modularity is given for all partition sizes} \\
+	\hline
+	\noalign{\smallskip} 
+	%
+	Spectral Clustering & 1-2 hours & 0.43  \\
+	Louvain & 20-30 seconds & 0.36 \\
+\end{tabular}
+\caption{Comparison of Implemented algorithms}
+\label{table:stats}
+\end{table}
+\end{savenotes}
+
+\begin{table}
+	\small
+\begin{tabular}{l*{7}{c}}
+	 Partition Size & 2 & 10 & 18 & 26 & 34 & 38 \\
+	%\hline
+	\noalign{\smallskip} 
+	%
+	Modularity & 0.43 & 0.32 & 0.31 & 0.30 & 0.31 & 0.31
+\end{tabular}
+\caption{Modularity for spectral clustering depending on partition size}
+\label{table:partition_size}
+\end{table}
+
+In table \ref{table:stats} the typical running time and 
+\emph{modularity} of \emph{Spectral} clustering and the \emph{Louvain} 
+method can be seen as measured on the articles from the 2012 ISIT, a 
+conference dealing with with topics in information theory. In terms of 
+\emph{modularity} The table doesn't show the whole truth as can be seen 
+in table \ref{table:partition_size}. As the partition size for spectral 
+clustering is increased, the \emph{modularity} goes down at first and 
+then stabilizes.  The author speculates that spectral clustering's 
+tendency to partition a graph evenly comes at a disadvantage when the 
+graph contains clusters of varying sizes. It is possible that the known 
+bias of the \emph{modularity} measure towards bigger clusters plays a 
+role in this behaviour as well.
+
+When evaluating these results it is important to keep in mind that both 
+the \emph{modularity} and the results of \cite{lancichinetti2009} are 
+based on implicit assumptions about the structure of the clusters in the 
+graph used. In order to best apply their results it makes sense to have 
+an idea of the statistical properties of the clusterings of the graph.  
+This in turn is difficult to obtain without using an algorithm to obtain 
+a clustering, something that implicitly introduces bias. This chicken 
+and the egg problematic is a bit hard to escape from as long as we don't 
+construct a model for how we expect the graph to behave and evaluate the 
+clustering algorithms based on these terms. This however is beyond the 
+scope of this paper.
+
+\emph{Modularity} aside the decrease running time of the \emph{Louvain} 
+method and the lack of partition size parameter makes it a lot more 
+fitting choice than \emph{spectral} clustering. As for the other 
+candidates that shows promise, in particular \emph{Potts} and 
+\emph{Infomap} they seem at the current stage not to provide enough of 
+an advantage in terms of a higher quality clustering to justify the 
+increased implementation difficulties.
+
+
+
+% How long does it take to compute on how many papers?
+% What is the Modularity, Surprise?

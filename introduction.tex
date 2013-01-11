@@ -4,18 +4,19 @@ When we try to make sense of a big amount of information, a natural way
 of beginning is to divide the information into smaller groups, and 
 investigate these groups seperately. Often we assign these groups 
 manually, but when reviewing a lot of information this can easily become 
-unfeasible. To aid us there have been developed a lot of techniques for 
-finding clusters in data using different heuristics and techniques to 
-obtain groupings. However the automatic methods don't always result in 
-meaningful groupings. They often discard information we would 
-implicitely include were we grouping the information manually and the 
-groups that are calculated might be across features and of sizes that 
-render them less useful.
+unfeasible. In order to aid a lot of techniques for finding clusters in 
+data using different heuristics and techniques have been developed.  
+However the automatic methods don't always result in meaningful 
+clusters. They often discard information we would implicitely include 
+were we grouping the information manually and the groups that are 
+calculated might be across features and of sizes that render them less 
+useful. In this work I will address the choice of automated measures 
+when clustering scientific articles.
 
 \subsection{Background}
 
 This project aims to explore how a group of conference articles are best 
-grouped. It is part of a project to provide a tool for conference 
+clustered. It is part of a project to provide a tool for conference 
 attendees to better get an overview over the hundreds of presentations 
 that usually take place at a scientific conference. In order to 
 facilitate exploring the presentations, we display the articles in a 
@@ -24,29 +25,29 @@ than articles describing different topics. The similarity is currently
 based on a na\"{i}ve bayesian comparison of word frequencies, but could 
 in theory be substituted with any given similarity measure.
 
-Based on this similarity graph the goal is to create a grouping which 
+Based on the similarity graph the aim is to create a grouping which 
 satisfies a few practical as well as theoretical criteria. These 
 criteria are selected with respect to real world usage where running 
 times and implementation complexity are important.  The criteria are:
 \begin{itemize}
-	\item[Speed]{Since this is a tool made for real world usage it must 
-			be feasible to calculate a grouping of up to a thousand 
-		articles within a few hours on normal hardware}
-	\item[Quality]{A given solution should be as `good' as possible.  
-			Later in this paper we will explore more in depth how we can 
-		possibly measure what a `good' clustering implies}
-	\item[Simplicity]{Given two similar solutions, the simpler one is 
-			better for two reasons. First, a simple solution is easier 
-			to implement and readapt to changing requirements. Second, a 
-		simple solution is less prone to contain bugs}
+	\item{\emph{Speed}. Since this is a tool made for real world usage 
+		it must be feasible to calculate a grouping of up to a thousand 
+	articles within a few hours on normal hardware}
+	\item{\emph{Quality}. A given solution should be as `good' as 
+		possible.  Later in this paper we will explore more in depth how 
+	we can possibly measure what a `good' clustering implies}
+	\item{\emph{Simplicity}. Given two similar solutions, the simpler 
+		one is better for two reasons. First, a simple solution is 
+	easier to implement and readapt to changing requirements. Second, a 
+simple solution is less prone to contain bugs}
 %	\item[Sensible Groupins]{A good solution should not return one group 
 %	encompassing pretty much all papers and leave the rest of the groups 
 %	with one or two papers. Similarly a good clustering doesn't 
 %	necessarily split the graph into $n$ groups of exactly the same 
 %	size}
-	\item[No Parameters]{Ideally an algorithm for finding groups should 
-		not need to be provided with anything else than the similarity 
-	graph}
+	\item{\emph{No Parameters}. Ideally an algorithm for finding groups 
+		should not need to be provided with anything else than the 
+	similarity graph}
 \end{itemize}
 
 \subsection{Structure of the paper}
@@ -55,7 +56,7 @@ In this paper I will outline a selection of different methods used to
 cluster similarity graphs and evaluate each one based on the above 
 criteria. Based on this selection I will propose two algorthims and 
 outline first how they have been implemented and then how they compare.  
-Before we get that far, I will start with a quick primer on the notation 
+To begin with I will start with a quick primer on terms and notation 
 used in the rest of this paper.
 
 \subsection{Terms and Notation}
@@ -63,26 +64,26 @@ used in the rest of this paper.
 For the reminder of this paper I will rely on concepts and notation from 
 Graph theory. To facilitate the discussion of different graph clustering 
 algorithms I will introduce a few simple concepts here that will appear 
-several times later on. A \emph{weighted graph} $G$ is a tripple of 
-tripple of two sets and a function: $G = (V, E, \omega)$. $V$ and $E$ 
-are sets of \emph{vertices} and \emph{edges} respectively, with $n = 
-|V|$ being the \emph{order} of the graph and $m = |E|$ being the number 
-of edges. Each edge $e_{ij}$ in an \emph{undirected graph} is an 
-unordered pair $\{v_i, v_j\}$ and has a weight $w_{ij}$ assigned by the 
-function $\omega : E \rightarrow \mathbb{R}$. The degree of a vertix 
-$v_i \in V$ is defined as $d_i = \sum_{j = 1}^n w_{ij}$. The adjecency 
-matrix $\textbf{A}_G$ is an $n \times n$ matrix $\textbf{A}_G = 
-(a_{i,j}^G)$ where $a_{i,j}^G = \omega(\{v_i,v_j\})$ if $\{v_i,v_j\} \in 
-E$ and $0$ otherwise.  The degree matrix $\textbf{D}_G$ in turn is the 
-diagonal matrix of size $n \times n$ such that $D_{ii} = d_i$
+several times later on. A \emph{weighted graph} $G$ is a tripple of two 
+sets and a function: $G = (V, E, \omega)$. $V$ and $E$ are sets of 
+\emph{vertices} and \emph{edges} respectively, with $n = |V|$ being the 
+\emph{order} of the graph and $m = |E|$ being the number of edges. Each 
+edge $e_{ij}$ in an \emph{undirected graph} is an unordered pair $\{v_i, 
+v_j\}$ and has a weight $w_{ij}$ assigned by the function $\omega : E 
+\rightarrow \mathbb{R}$. The degree of a vertix $v_i \in V$ is defined 
+as $d_i = \sum_{j = 1}^n w_{ij}$. The adjecency matrix $\textbf{A}$ is 
+an $n \times n$ matrix $\textbf{A} = (A_{i,j})$ where $A_{i,j} = 
+\omega(\{v_i,v_j\})$ if $\{v_i,v_j\} \in E$ and $0$ otherwise.  The 
+degree matrix $\textbf{D}$ in turn is the diagonal matrix of size $n 
+\times n$ such that $D_{ii} = d_i$
 \footnote{Adapted from \cite{schaeffer2007} and \cite{von2007}}.
 
 Additionally it is worth mentioning that the terms \emph{cluster} and 
 \emph{community} are both used in the academic litterature usually 
-covering over the same thing. Where algorithms on graphs are involved 
-the word \emph{clustering} has traditionally been used more where as 
-communities are often mentioned in terms of \emph{networks} that are 
-then later formalized as graphs. In this paper I have chosen to use the 
-words \emph{cluster} and \emph{clustering}, but this choice is not 
-intended to reflect a stronger connotation with one group of methods 
+covering over the same concept. Where algorithms on graphs are involved 
+the word \emph{clustering} has traditionally been used more in relation 
+with graphs, communities are often mentioned in terms of \emph{networks} 
+that are then later formalized as graphs. In this paper I have chosen to 
+use the words \emph{cluster} and \emph{clustering}, but this choice is 
+not intended to reflect a stronger connotation with one group of methods 
 than another.
